@@ -20,7 +20,11 @@ const App: React.FC = () => {
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
 
   const fetchAllPrices = async () => {
-    setIsLoading(true);
+    // Don't set loading to true for background refresh
+    if (!lastUpdated) {
+      setIsLoading(true);
+    }
+
     try {
       const [goldResult, currenciesResult, materialsResult] = await Promise.all([
         fetchGoldPrices(),
@@ -46,7 +50,11 @@ const App: React.FC = () => {
       setSources(uniqueSources);
 
     } catch (err) {
-      setError('فشل في تحميل البيانات. يرجى المحاولة مرة أخرى لاحقًا.');
+      if (!navigator.onLine) {
+        setError('أنت غير متصل بالإنترنت. البيانات المعروضة قد تكون قديمة.');
+      } else {
+        setError('فشل في تحميل البيانات. يرجى المحاولة مرة أخرى لاحقًا.');
+      }
       console.error(err);
     } finally {
       setIsLoading(false);
